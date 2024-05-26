@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Braintree Checker</title>
+    <link href="style.css" rel="stylesheet" id="bootstrap-css">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" crossorigin="anonymous">
+    <link rel="icon" type="image/png" href="asset/devil.png">
+    <style>
+        * {
+            font-family: 'Times New Roman', serif;
+        }
+        body {
+            background-color: black;
+            color: red;
+        }
+        .message {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+        .message-content {
+            background-color: #333333;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #333333;
+            width: 300px;
+            height: 420px;
+            border-radius: 5px;
+        }
+        .fa-info-circle {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+        .close {
+            color: blue;
+        }
+        .card-body {
+            border-radius: 13px;
+        }
+        #mostra, #mostra2, #mostra3 {
+            border-radius: 10px;
+        }
+        .rainbow_text_animated {
+            background: linear-gradient(to right, #6666ff, #0099ff , #00ff00, #ff3399, #6666ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            font-size: 58px;
+            font-family: 'kalam';
+            text-shadow: 0 0 35px  #FF0000,0 0 60px  #FF0000;
+            color: transparent;
+            animation: rainbow_animation 2s ease-in-out infinite;
+            background-size: 400% 100%;
+        }
+        @keyframes rainbow_animation {
+            0%, 100% {
+                background-position: 0 0;
+            }
+            50% {
+                background-position: 100% 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <div class="row col-md-12">
+            <div class="card col-sm-12">
+                <div class="card-body">
+                    <div class="md-form">
+                        <div class="col-md-12">
+                            <center>
+                                <div class="md-form">
+                                    <span>Approved CVV:</span>&nbsp;<span id="cLive" class="badge badge-success">0</span>
+                                    <span>Approve CCN:</span>&nbsp;<span id="cWarn" class="badge badge-warning">0</span>
+                                    <span>Declined:</span>&nbsp;<span id="cDie" class="badge badge-danger">0</span>
+                                    <span>Checked:</span>&nbsp;<span id="total" class="badge badge-info">0</span>
+                                    <span>Total:</span>&nbsp;<span id="carregadas" class="badge badge-dark">0</span>
+                                </div>
+                                <br>
+                                <textarea type="text" style="text-align: center; background-color: rgba(255, 255, 255, .1); color: white; maxlength: 700;" placeholder="434256XXXXXXXXXX|06|2026|666" id="lista" class="md-textarea form-control" rows="4" placeholder="Enter Cards"></textarea>
+                                <br>
+                                <textarea type="text" style="text-align: center; background-color: rgba(255, 255, 255, .1); color: white;" maxlength="700" id="sec" class="form-control" rows="1" placeholder="Paste your B3 Magento Shit here"></textarea>
+                                <br>
+                                <button class="btn btn-warning" style="width: 200px; outline: none;" id="testar" onclick="start()"><b>START THIS SHIT</b></button>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="font-weight: bold; color: green;" class="card-title">Approved CVV: <span id="cLive2" class="badge badge-success">0</span></h6>
+                    <div id="bode"><span class="aprovadas"></span></div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="font-weight: bold; color: yellow;" class="card-title">Approve CCN: <span id="cWarn2" class="badge badge-warning">0</span></h6>
+                    <div id="bode3"><span class="edrovadas"></span></div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 style="font-weight: bold; color: red;" class="card-title">Declined: <span id="cDie2" class="badge badge-danger">0</span></h6>
+                    <div id="bode2"><span class="reprovadas"></span></div>
+                </div>
+            </div>
+        </div>
+    </center>
+    <script src="./script.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function start() {
+            var apiEndpoint = 'api_handler.php';
+            var linha = $("#lista").val();
+            var linhastart = linha.split("\n");
+            var total = linhastart.length;
+            var ap = 0;
+            var ed = 0;
+            var rp = 0;
+            linhastart.forEach(function(value, index) {
+                setTimeout(function() {
+                    var sec = $("#sec").val();
+                    $.ajax({
+                        url: apiEndpoint + '?lista=' + value + '&sec=' + sec,
+                        type: 'GET',
+                        async: true,
+                        success: function(resultado) {
+                            if (resultado.match("#CVV")) {
+                                removelinha();
+                                ap++;
+                                aprovadas(resultado + "");
+                            } else if (resultado.match("#CCN")) {
+                                removelinha();
+                                ed++;
+                                edrovadas(resultado + "");
+                            } else {
+                                removelinha();
+                                rp++;
+                                reprovadas(resultado + "");
+                            }
+                            $('#carregadas').html(total);
+                            var fila = parseInt(ap) + parseInt(ed) + parseInt(rp);
+                            $('#cLive').html(ap);
+                            $('#cWarn').html(ed);
+                            $('#cDie').html(rp);
+                            $('#total').html(fila);
+                            $('#cLive2').html(ap);
+                            $('#cWarn2').html(ed);
+                            $('#cDie2').html(rp);
+                        }
+                    });
+                }, 1500 * index);
+            });
+        }
+
+        function aprovadas(str) {
+            $(".aprovadas").append(str + "<br>");
+        }
+
+        function edrovadas(str) {
+            $(".edrovadas").append(str + "<br>");
+        }
+
+        function reprovadas(str) {
+            $(".reprovadas").append(str + "<br>");
+        }
+
+        function removelinha() {
+            var lines = $("#lista").val().split('\n');
+            lines.splice(0, 1);
+            $("#lista").val(lines.join("\n"));
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.11/js/mdb.min.js"></script>
+</body>
+</html>
