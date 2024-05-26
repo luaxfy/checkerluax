@@ -1,2 +1,2 @@
 # checkerluax
-bu jesus check
+by jesus check
